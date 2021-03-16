@@ -1,0 +1,11 @@
+{
+  "name": "three_bloom",
+  "version": "1.0.0",
+  "description": "Bloom renderer for THREEjs glow effects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ryan Hafner (r.hafner20@gmail.com)",
+  "license": "MIT"
+}
