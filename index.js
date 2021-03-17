@@ -24,7 +24,7 @@ class BloomRenderer {
     constructor({ 
         scene, camera, renderer,
         embedded = false, width = window.innerWidth, height = window.innerHeight,
-        exposure = 0.8, strength = 4, threshold = 0, radius = 0.5, layer = 1 
+        exposure = 0.8, strength = 4, radius = 0.5, threshold = 0, layer = 1 
     }) {
         this.scene = scene;
         this.camera = camera;
@@ -36,8 +36,8 @@ class BloomRenderer {
         this.layer = layer;
         this.settings = {
             strength,
-            threshold,
-            radius
+            radius,
+            threshold
         }
 
         const renderScene = new THREE.RenderPass(scene, camera);
@@ -45,8 +45,7 @@ class BloomRenderer {
         this.bloomLayer = new THREE.Layers();
         this.bloomLayer.set(this.layer);
 
-        const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 1.5, 0.4, 0.85);
-        Object.assign(bloomPass, this.settings);
+        const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), strength, radius, threshold);
 
         this.bloomComposer = new THREE.EffectComposer(renderer);
         this.bloomComposer.renderToScreen = false;
@@ -57,7 +56,7 @@ class BloomRenderer {
             new THREE.ShaderMaterial({
                 uniforms: {
                     baseTexture: { value: null },
-                    bloomTexture: { value: bloomComposer.renderTarget2.texture }
+                    bloomTexture: { value: this.bloomComposer.renderTarget2.texture }
                 },
                 vertexShader,
                 fragmentShader,
@@ -71,7 +70,15 @@ class BloomRenderer {
         this.finalComposer.addPass(renderScene);
         this.finalComposer.addPass(finalPass);
 
+        this.darkenNonBloomed = this.darkenNonBloomed.bind(this);
+        this.restoreMaterial = this.restoreMaterial.bind(this);
+
         if (!embedded) window.addEventListener('resize', () => this.resize());
+    }
+
+    enableObjects(objs = []) {
+        if (Array.isArray(objs)) objs.forEach(obj => obj.layers.enable(this.layer));
+        else objs.layers.enable(this.layer);
     }
 
     render() {
