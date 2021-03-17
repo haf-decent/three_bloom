@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Complex Example</title>
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://threejs.org/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://threejs.org/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://threejs.org/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://threejs.org/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://threejs.org/examples/js/shaders/CopyShader.js"></script>
+    <style>
+        body, html {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+</body>
+<script type="module">
+    import BloomRenderer from './index.js';
+
+    window.addEventListener('load', () => {
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        document.body.appendChild(renderer.domElement);
+
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 200);
+        camera.position.set(0, 10, 20);
+        camera.lookAt(0, 0, 0);
+
+        // initialize bloom
+        const bloom = new BloomRenderer({ scene, camera, renderer });
+
+        // bloom will automatically resize to be full-screen since !embedded
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height);
+        });
+
+        // Lights
+        const ambient = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(ambient);
+
+        const light = new THREE.DirectionalLight(0xffffff, 4);
+        light.position.set(0, 10, 0);
+        light.rotation.x = -Math.PI / 12;
+        scene.add(light);
+
+        // middle sphere
+        const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(2, 64, 32), 
+            new THREE.MeshStandardMaterial({ color: 'red' })
+        );
+        bloom.enableObjects(sphere);
+        scene.add(sphere);
+
+        // boxes
+        const boxGeo = new THREE.BoxGeometry(4, 4, 4);
+        const boxMat = new THREE.MeshStandardMaterial({ color: 'cyan' });
+        for (let i = 0; i < 6; i++) {
+            const box = new THREE.Mesh(boxGeo, boxMat);
+            const angle = Math.PI / 3 * i
+            box.position.set(10 * Math.sin(angle), 0, 10 * Math.cos(angle));
+            scene.add(box);
+        }
+
+        const render = () => {
+            requestAnimationFrame(render);
+
+            bloom.render();
+        }
+        render();
+    });
+    
+</script>
+
+</html>
