@@ -102,7 +102,7 @@ class BloomRenderer {
         }
     }
 
-    resize({ width = window.innerWidth, height = window.innerHeight }) {
+    resize({ width = window.innerWidth, height = window.innerHeight } = {}) {
         this.bloomComposer.setSize(width, height);
         this.finalComposer.setSize(width, height);
     }
