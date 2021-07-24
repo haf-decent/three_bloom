@@ -37,6 +37,9 @@
         camera.position.set(0, 10, 20);
         camera.lookAt(0, 0, 0);
 
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.update();
+
         // initialize bloom
         const bloom = new BloomRenderer({ scene, camera, renderer });
 
@@ -80,6 +83,7 @@
 
         const render = () => {
             requestAnimationFrame(render);
+            controls.update();
 
             bloom.render();
         }
